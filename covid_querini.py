@@ -13,4 +13,4 @@ loading_as_python_object = json.loads(response.content)
 df_covid = pd.DataFrame.from_dict(loading_as_python_object)
 
 ### CREATE CSV AND EXPORT
-df_covid.to_csv("covid_1.csv", index=False)
+df_covid.to_csv("covid.csv", index=False)
