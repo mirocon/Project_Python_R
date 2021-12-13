@@ -5,6 +5,8 @@ library(hms)
 library(RColorBrewer)
 library(harrypotter)
 library(viridis)
+
+
 daily_weather <- read_csv("https://raw.githubusercontent.com/MarcoAmadori1/API_project/main/6_daily.csv")
 countries<-read_csv("https://raw.githubusercontent.com/MarcoAmadori1/API_project/main/results.csv")
 hourly_data<-read_csv("https://raw.githubusercontent.com/MarcoAmadori1/API_project/main/hourly.csv")
@@ -77,6 +79,8 @@ ggplot(data=df, mapping=aes(x= region, fill=region))+
 
 #### Visualization by region
 
+### Central Europe
+
 df_central<- filter(df,df$region=="Central Europe")
 
 ggplot(data=df_central, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
@@ -100,3 +104,61 @@ ggplot(data=df_central, mapping=aes(x=time,y=relativehumidity_2m, color=capital_
   scale_color_viridis(discrete=TRUE, option="magma")+
   facet_wrap(~capital_cities)+
   labs(title="Relative Humidity in Central Europe")
+
+
+### Southern Europe
+
+s_colors<-c("#B22222","#FF7F50","#FFD700","#9ACD32","#228B22", 
+  "#00CED1", "#6495ED", "#00BFFF", "#1E90FF","#8A2BE2","#8B008B",
+  "#9370DB","#D2691E","#DC143C","#FF69B4", "#000080")
+
+df_south<- filter(df,df$region=="Southern Europe")
+
+
+ggplot(data=df_south, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  facet_wrap(~capital_cities)+
+  scale_color_manual(values=s_colors)+
+  labs(title="Temperature in Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  scale_fill_manual(values=s_colors)+
+  geom_histogram(bins=25)+
+  labs(title="Shortwave_radiation_sum in Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  facet_wrap(~capital_cities)+
+  scale_color_manual(values=s_colors)+
+  labs(title="Relative Humidity in Southern Europe")
+
+### Caucasian Region
+
+df_caucasian<- filter(df,df$region=="Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_hp(discrete=TRUE,option ="NewtScamander")+
+  labs(title="Temperature in the Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in the Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins = 20)+
+  scale_fill_hp(discrete=TRUE,option ="NewtScamander")+
+  labs(title="Shortwave_radiation_sum in the Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  facet_wrap(~capital_cities)+
+  scale_color_hp(discrete=TRUE,option ="NewtScamander")+
+  labs(title="Relative Humidity in the Caucasian Region")
+
