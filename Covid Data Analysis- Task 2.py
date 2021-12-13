@@ -85,3 +85,75 @@ plot_data_cases(df_covid_cases[countries]) #here I just subset for the countries
 plot_data_death(df_covid_death[countries])
 plot_data_million(df_covid_million[countries])
 plot_cases_cum(df_cases_cum[countries])
+
+### BAR PLOT VISUALIZATION
+df2 = data.groupby('continent')['cases'].agg(['sum'])
+a=df2.index.tolist()
+df2["continent"]=a
+plt.barh(df2["continent"], df2["sum"])
+plt.xticks(range(1, 30000000))
+plt.show()
+
+
+
+
+###interactive chart
+import plotly.express as px
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+
+all_countries = data.country.unique()
+app = dash.Dash(__name__)
+app.layout = html.Div([
+
+    html.Div([
+        dcc.Dropdown(
+        id='Countries',
+        options=[{'label': k, 'value': k} for k in all_countries],
+        multi=True,
+        searchable=True
+    ), html.H1(children='Covid Cases',
+               style={'textAlign': 'center',
+            'color': "#180FB0",
+                      "font-family":"Helvetica"}),
+        dcc.Graph(id="graph")]),
+
+    html.Div([
+        html.H1(children='Covid Deaths', style={'textAlign': 'center',
+            'color': "#180FB0",
+                      "font-family":"Helvetica"}),
+        dcc.Graph(
+            id='graph2'
+        ),
+    ]),
+])
+
+@app.callback(
+    Output("graph", "figure"),
+    [Input("Countries", "value")])
+
+def update_line_chart(countries):
+    mask = data.country.isin(countries)
+    fig = px.line(data[mask],x="date", y="cases", color="country",width=2000, height=1000)
+    fig.update()
+    return fig
+
+@app.callback(Output('graph2', 'figure'),
+              Input("Countries", "value"))
+
+def update_line_chart2(countri):
+    mask = data.country.isin(countri)
+    fig2 = px.line(data[mask],
+        x="date", y="deaths", color='country',width=2000, height=1000)
+    return fig2
+
+app.run_server(debug=False, mode="inline")
+
+
+
+
+
+
+
