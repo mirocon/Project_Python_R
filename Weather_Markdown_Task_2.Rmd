@@ -1,0 +1,423 @@
+---
+title: "Second Task- Visualization on weather data"
+author: "Maria Cicone, Giorgia Leonardi, Miro Confalone"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Data manipulation
+
+We retrieved the three .csv files from the Github project of our colleagues regarding the weather and decided to merge them into a single one using the left_join() function. We found some NAs and filled them with the appropriate values. 
+Given that we found a dataset with a large number of different cities (51), we decided to group their respective countries in regions by creating a small dataframe and attaching it to the "df" dataset through the aforementioned function. In this way, we added a new column to the dataset.
+
+```{r results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readr)
+library(lubridate)
+library(hms)
+library(RColorBrewer)
+library(harrypotter)
+library(viridis)
+```
+```{r message=FALSE}
+daily_weather <- read_csv("https://raw.githubusercontent.com/MarcoAmadori1/API_project/main/6_daily.csv")
+countries<-read_csv("https://raw.githubusercontent.com/MarcoAmadori1/API_project/main/results.csv")
+hourly_data<-read_csv("https://raw.githubusercontent.com/MarcoAmadori1/API_project/main/hourly.csv")
+
+countries<-replace_na(data=countries,replace=list(country="Vatican City",country_code="va"))
+
+
+countries_reviewed<- countries%>%
+  select(country, country_code, capital_cities, lat, long)
+joined_data <- hourly_data %>%
+  left_join(countries_reviewed, by="capital_cities") 
+
+joined_data<-select(joined_data, select=-c("...1"))
+
+daily_reviewed<-select(daily_weather, select=-c("...1", "weathercode"))
+
+df<- joined_data%>%
+  left_join(daily_reviewed, by=c("time","capital_cities"))
+
+df<-df %>%
+  fill(everything())
+
+country<-c("Albania","Andorra","Armenia","Austria","Azerbaijan","Belarus","Belgium","Bosnia and Herzegovina","Bulgaria","Croatia","Cyprus","Czechia","Denmark","Estonia","Finland","France","Georgia","Germany","Greece","Hungary","Iceland","Ireland","Italy","Kazakhstan","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Malta","Moldova","Monaco","Montenegro","Netherlands","North Macedonia","Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Turkey","Ukraine","United Kingdom", "Vatican City")
+region<-c("Southern Europe","Southern Europe","Caucasian Region","Central Europe","Caucasian Region","Eastern Europe","Western Europe","Southern Europe","Eastern Europe","Southern Europe","Southern Europe","Central Europe","Northern Europe","Northern Europe","Northern Europe","Western Europe","Caucasian Region","Central Europe","Southern Europe","Central Europe","Northern Europe","Northern Europe","Southern Europe","Eastern Europe","Southern Europe","Northern Europe","Western Europe","Northern Europe","Western Europe","Southern Europe","Eastern Europe","Western Europe","Southern Europe","Western Europe","Southern Europe","Northern Europe","Central Europe","Southern Europe","Eastern Europe","Eastern Europe","Southern Europe","Southern Europe","Central Europe","Central Europe","Southern Europe","Northern Europe","Central Europe","Caucasian Region","Eastern Europe","Northern Europe", "Southern Europe")
+geographic_position<-data.frame(country, region)
+
+df<-df%>%
+  left_join(geographic_position, by="country")
+```
+
+
+The following table resumes the 24 numeric variables of the final dataframe.
+
+
+
+Selected variables | Description | Unit |
+-------------------| ------------| -----|
+pressure_msl | Atmospheric air pressure reduced to sea level | hPa |
+temperature_2m | Air temperature at 2 meters above ground | °C (°F) |
+snow_height | Snow height on the ground | meters |
+direct_radiation | Direct solar radiation as average of the preceding hour on the horizontal plane and the normal plane (perpendicular to the sun)| W/m² |
+weathercode | The most severe weather condition on a given day | WMO code |
+winddirection_10m | Wind direction at 10, 80, 120 or 180 meters above ground | ° |
+precipitation | Total precipitation (rain, showers, snow) sum of the preceding hour | mm (inch) |
+relativehumidity_2m | Relative humidity at 2 meters above ground | % |
+windspeed_10m | Wind speed on 10 meters is the standard level. | km/h (mph, m/s, knots) |
+apparent_temperature | Apparent temperature is the perceived feels-like tempertature combinding wind chill factor, realtive humidity and solar radition | °C (°F) |
+cloudcover | Total cloud cover as an area fraction | % |
+temperature_2m_max, temperature_2m_min | Maximum and minimum daily air temperature at 2 meters above ground | °C (°F) |
+apparent_temperature_max, apparent_temperature_min | Maximum and minimum dailt apparent temperature | °C (°F) |
+sunset, sunset | Sun rise and set times | iso8601 |
+precipitation_sum | Sum of daily precipitation | mm |
+precipitation_hours | The number of hours with rain
+windspeed_10m_max, windgusts_10m_max | Maximum wind speed and gusts on a day | hours |
+winddirection_10m_dominant | Dominant wind direction | ° |
+shortwave_radiation_sum | The sum of solar radiation on a given day in Mega Joules | MJ/m² |
+lat | latitude
+long | longitude
+
+### Data visualization
+
+We firstly chose to compare the most relevant variables in order to visualize the relations among them.
+
+The first correlation we tried to explore was the one between the max temperature and the latitude of the city.
+
+
+```{r, echo=FALSE}
+### Max temperature vs latitude
+ggplot(data=df)+
+  geom_point(mapping=aes(x=lat, y=temperature_2m_max, color=region))+
+  facet_wrap(date(df$time))+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title="Max temperature vs latitude")
+```
+
+
+As we can see on the plots, there is inverse correlation between the two variables.
+
+We proceeded with the same kind of analysis on sunset and 
+sunrise time versus the cities' longitude.
+
+
+```{r, echo=FALSE, message=FALSE}
+###Sunrise time vs longitude
+
+ggplot(data=df)+
+  geom_point(mapping=aes(x=long, y=as_hms(sunrise), color=region))+
+  facet_wrap(date(df$time))+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title="Sunrise time vs longitude")
+```
+
+```{r, echo=FALSE,message=FALSE}
+
+###Sunset time vs longitude
+
+ggplot(data=df)+
+  geom_point(mapping=aes(x=long, y=as_hms(sunset), color=region))+
+  facet_wrap(date(df$time))+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title="Sunset time vs longitude")
+```
+
+
+It is evident that there is an inverse correlation between the sunset/sunrise time and the longitude too.
+
+Then we took precipitation and cloudcover as variables and plotted them.
+
+
+```{r, echo=FALSE,message=FALSE}
+###precipitation x cloudcover
+
+ggplot(data = df)+
+  geom_point(mapping=aes(x=cloudcover,y=precipitation))+
+  labs(title="Precipitation vs cloudcover")
+```
+
+
+We see there could be direct correlation between the two. The higher the percentages of cloudcover, the more precipitations there will be.
+
+Lastly, we decided to visualize the number of observations per region.
+
+
+```{r, echo=FALSE,message=FALSE}
+
+### Observations per region
+
+ggplot(data=df, mapping=aes(x= region, fill=region))+
+  scale_fill_brewer(palette="Spectral")+
+  geom_bar()+
+   scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title="Observations per region")
+```
+
+
+We can immediately see that the majority of observations is related to Southern Europe. Conversely, the observations on the remaining regions were more or less equally distributed, with the Caucasian region registering the lowest number.
+
+Considering that the number of observations is more manageable when dividing it by regions, we opted for further visualization on these smaller datasets.
+
+
+### Visualization by regions
+
+We created new dataframes through the filter() function.
+The four graphs we built represented:1) a time series of temperature; 2)A scatterplot of actual vs apparent temperature; 3) A histogram of the radiation sum; 4) a times series of relative humidity.
+
+All these graphs visualize the difference among the region's capital cities through the usage of color. For the second dataframe, given that the number of cities was equal to 16, we created a customized palette in order to color it.
+
+
+### Central Europe
+```{r, echo=FALSE, message=FALSE,warning=FALSE }
+df_central<- filter(df,df$region=="Central Europe")
+
+ggplot(data=df_central, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_viridis(discrete=TRUE, option="magma")+
+  facet_wrap(~capital_cities)+
+  labs(title="Temperature in Central Europe")
+
+ggplot(data=df_central, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in Central Europe")
+
+ggplot(data=df_central, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins=20)+
+  scale_fill_viridis(discrete=TRUE, option="magma")+
+  labs(title="Shortwave_radiation_sum in Central Europe")
+
+ggplot(data=df_central, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  scale_color_viridis(discrete=TRUE, option="magma")+
+  facet_wrap(~capital_cities)+
+  labs(title="Relative Humidity in Central Europe")
+```
+
+The first graph shows that Ljubljana was the city where the highest temperatures were recorded. The others registered similar trends.
+
+The second graph showed that the apparent temperature was quite similar to the actual one.
+
+The third one shows that the city with the largest amount of daily radiations was Budapest. On the opposite side, Warsaw registered the lowest number of radiations.
+
+The last graph depicts Bern as the city with the highest and most consistent level of humidity.
+
+
+
+### Southern Europe
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE }
+
+s_colors<-c("#B22222","#FF7F50","#FFD700","#9ACD32","#228B22", 
+  "#00CED1", "#6495ED", "#00BFFF", "#1E90FF","#8A2BE2","#8B008B",
+  "#9370DB","#D2691E","#DC143C","#FF69B4", "#000080")
+
+df_south<- filter(df,df$region=="Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  facet_wrap(~capital_cities)+
+  scale_color_manual(values=s_colors)+
+  labs(title="Temperature in Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  scale_fill_manual(values=s_colors)+
+  geom_histogram(bins=25)+
+  labs(title="Shortwave_radiation_sum in Southern Europe")
+
+ggplot(data=df_south, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  facet_wrap(~capital_cities)+
+  scale_color_manual(values=s_colors)+
+  labs(title="Relative Humidity in Southern Europe")
+```
+
+
+
+The first graph shows that Nicosia and La Valletta were the cities where the highest temperatures were recorded. Moreover, Zagreb and San Marino were the ones with the lowest temperature variation between day and night.
+
+The second graph shows that the apparent temperature was quite similar to the actual one.
+
+The third one shows that the cities with the largest amount of daily radiations were Lisbon, Nicosia and La Valletta. On the opposite side, San Marino, Zagreb and Sarajevo registered the lowest number of radiations.
+
+The last graph depicts San Marino as the city with the highest and most consistent level of humidity, together with Sarajevo.
+
+
+
+### The Caucasian Region
+
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+###
+
+df_caucasian<- filter(df,df$region=="Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_hp(discrete=TRUE,option ="NewtScamander")+
+  labs(title="Temperature in the Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+labs(title="Apparent vs Actual Temperature in the Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins = 20)+
+  scale_fill_hp(discrete=TRUE,option ="NewtScamander")+
+  labs(title="Shortwave_radiation_sum in the Caucasian Region")
+
+ggplot(data=df_caucasian, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  facet_wrap(~capital_cities)+
+  scale_color_hp(discrete=TRUE,option ="NewtScamander")+
+  labs(title="Relative Humidity in the Caucasian Region")
+```
+
+
+
+The first graph shows that Baku and Tbilisi were the cities here the highest temperatures were recorded, but the temperature in the first one was more consistent, registering the lowest temperature variation between day and night.
+
+The second graph showed that the apparent temperature was quite similar to the actual one everywhere but in Baku, where the apparent temperature was fount to be considerably lower than the actual one several times.
+
+The third one shows that the cities with the largest amount of daily radiations were Ankara and Yerevan.On the opposite side, Baku registered the lowest number of radiations.
+
+The last graph depicts Tbilisi as the city with the highest level of humidity, while Baku shows the most consistent values.
+
+
+### Northern Europe
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+##
+df_north<- filter(df,df$region=="Northern Europe")
+
+ggplot(data=df_north, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line()+
+  scale_color_brewer(palette="Paired")+
+  facet_wrap(~capital_cities)+
+  labs(title="Temperature in Northern Europe")
+
+ggplot(data=df_north, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+labs(title="Apparent vs Actual Temperature in Northern Europe")
+
+ggplot(data=df_north, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins=20)+
+  scale_fill_brewer(palette="Paired")+
+  labs(title="Shortwave_radiation_sum in Northern Europe")
+
+
+ggplot(data=df_north, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  facet_wrap(~capital_cities)+
+  scale_color_brewer(palette="Paired")+
+  labs(title="Relative Humidity in Northern Europe")
+
+```
+
+
+
+The first graph shows that Dublin and London were the cities where the highest temperatures were recorded.Copenhagen registered the lowest temperature variation between day and night. Helsinki and Tallin recorded the lowest temperature.
+
+The second graph shows that the apparent temperature was quite similar to the actual one, but in Copenhagen.Generally speaking, though, the lines appear to be thicker than the ones of the other regions, which means that the apparent temperature swings more in relation to a single value of actual temperature.
+
+The third one shows that the city with the largest amount of daily radiations was London.On the opposite side Reykjavik registered the lowest number of radiations.
+
+The last graph depicts Copenhagen and Reykjavik as the cities with the lowest level of humidity.
+
+
+### Eastern Europe
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+####
+
+df_east<- filter(df,df$region=="Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_brewer(palette="Set1")+
+  labs(title="Temperature in Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+labs(title="Apparent vs Actual Temperature in Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins=20)+
+  scale_fill_brewer(palette="Set1")+
+  labs(title="Shortwave_radiation_sum in Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  facet_wrap(~capital_cities)+
+  scale_color_brewer(palette="Set1")+
+  labs(title="Relative Humidity in Eastern Europe")
+
+```
+
+
+The first graph shows that Bucharest and Sofia were the cities where the highest temperatures were recorded. Moreover, Moscow was the one with the lowest temperature variation between day and night. Nur-Sultan registered the lowest temperature.
+
+The second graph showed that the apparent temperature was quite similar to the actual one.
+
+The third one shows that the cities with the largest amount of daily radiations were Sofia and Bucharest, especially the first of the two.On the opposite side Moscow and Minsk registered the lowest number of radiations.
+
+The last graph depicts Minsk as the city with the highest level of humidity.
+
+
+
+### Western Europe
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+###
+
+df_west<- filter(df,df$region=="Western Europe")
+
+ggplot(data=df_west, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_hp(discrete=TRUE,option ="Ravenclaw")+
+  labs(title="Temperature in Western Europe")
+
+ggplot(data=df_west, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in Western Europe")
+
+ggplot(data=df_west, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+    geom_histogram(bins=20)+
+    scale_fill_hp(discrete=TRUE,option ="Ravenclaw")+
+    labs(title="Observations per region")
+
+ggplot(data=df_west, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  scale_color_hp(discrete=TRUE,option ="Ravenclaw")+
+  facet_wrap(~capital_cities)+
+  labs(title="Relative Humidity in Western Europe")
+```
+
+
+
+
+The first graph shows that Monaco was the city where the highest temperatures were recorded and with the lowest temperature variation between day and night.
+
+The second graph showed that the apparent temperature was quite similar to the actual one. Generally speaking, though, the lines appear to be thicker than the ones of other regions, which means that the apparent temperature swings more in relation to a single value of actual temperature, especially in Monaco.
+
+The third one shows that the city with the largest amount of daily radiations was Monaco.On the opposite side, Brussels registered the lowest number of radiations.
+
+The last graph depicts Luxembourg as the city with the highest and most consistent level of humidity.The lowest level of humidity was registered by Monaco.
