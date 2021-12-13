@@ -59,3 +59,29 @@ def plot_data_death(df, title="COVID-19 Death"):
     plt.tick_params(axis='y', labelsize=7)
     plt.tight_layout()
     plt.show()
+
+###plot cases per million inhabitants
+def plot_data_million(df, title="COVID-19 Cases per Million Inhabitants"):
+    df.plot(title=title, fontsize=7)
+    plt.xlabel("Dates")
+    plt.ylabel("Cases per 1M")
+    plt.xticks( rotation=45)
+    plt.tick_params(axis='y', labelsize=7)
+    plt.tight_layout()
+    plt.show()
+
+### plot cumulative cases
+def plot_cases_cum(df, title="Cumulative COVID-19 Cases"):
+    df.plot(title=title, fontsize=7)
+    plt.xlabel("Dates")
+    plt.ylabel("Cumulative Cases")
+    plt.xticks( rotation=45)
+    plt.tick_params(axis='y', labelsize=7)
+    plt.tight_layout()
+    plt.show()
+
+### execution
+plot_data_cases(df_covid_cases[countries]) #here I just subset for the countries that I've chosen before
+plot_data_death(df_covid_death[countries])
+plot_data_million(df_covid_million[countries])
+plot_cases_cum(df_cases_cum[countries])
