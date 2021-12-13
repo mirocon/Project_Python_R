@@ -35,3 +35,68 @@ df<-df%>%
   left_join(geographic_position, by="country")
 
 ### Max temperature vs latitude
+ggplot(data=df)+
+  geom_point(mapping=aes(x=lat, y=temperature_2m_max, color=region))+
+  facet_wrap(date(df$time))+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title="Max temperature vs latitude")
+
+###Sunrise time vs longitude
+
+ggplot(data=df)+
+  geom_point(mapping=aes(x=long, y=as_hms(sunrise), color=region))+
+  facet_wrap(date(df$time))+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title="Sunrise time vs longitude")
+
+###Sunset time vs longitude
+
+ggplot(data=df)+
+  geom_point(mapping=aes(x=long, y=as_hms(sunset), color=region))+
+  facet_wrap(date(df$time))+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title="Sunset time vs longitude")
+
+
+###precipitation x cloudcover
+
+ggplot(data = df)+
+  geom_point(mapping=aes(x=cloudcover,y=precipitation))+
+  labs(title="Precipitation vs cloudcover")
+
+
+### Observations per region
+
+ggplot(data=df, mapping=aes(x= region, fill=region))+
+  scale_fill_brewer(palette="Spectral")+
+  geom_bar()+
+  scale_x_discrete(guide = guide_axis(n.dodge=3))+
+  labs(title="Observations per region")
+
+
+
+#### Visualization by region
+
+df_central<- filter(df,df$region=="Central Europe")
+
+ggplot(data=df_central, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_viridis(discrete=TRUE, option="magma")+
+  facet_wrap(~capital_cities)+
+  labs(title="Temperature in Central Europe")
+
+ggplot(data=df_central, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in Central Europe")
+
+ggplot(data=df_central, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins=20)+
+  scale_fill_viridis(discrete=TRUE, option="magma")+
+  labs(title="Shortwave_radiation_sum in Central Europe")
+
+ggplot(data=df_central, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  scale_color_viridis(discrete=TRUE, option="magma")+
+  facet_wrap(~capital_cities)+
+  labs(title="Relative Humidity in Central Europe")
