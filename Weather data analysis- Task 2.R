@@ -33,3 +33,5 @@ geographic_position<-data.frame(country, region)
 
 df<-df%>%
   left_join(geographic_position, by="country")
+
+### Max temperature vs latitude
