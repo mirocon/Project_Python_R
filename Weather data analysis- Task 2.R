@@ -162,3 +162,93 @@ ggplot(data=df_caucasian, mapping=aes(x=time,y=relativehumidity_2m, color=capita
   scale_color_hp(discrete=TRUE,option ="NewtScamander")+
   labs(title="Relative Humidity in the Caucasian Region")
 
+
+##
+df_north<- filter(df,df$region=="Northern Europe")
+
+ggplot(data=df_north, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line()+
+  scale_color_brewer(palette="Paired")+
+  facet_wrap(~capital_cities)+
+  labs(title="Temperature in Northern Europe")
+
+ggplot(data=df_north, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+labs(title="Apparent vs Actual Temperature in Northern Europe")
+
+ggplot(data=df_north, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins=20)+
+  scale_fill_brewer(palette="Paired")+
+  labs(title="Shortwave_radiation_sum in Northern Europe")
+
+
+ggplot(data=df_north, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  facet_wrap(~capital_cities)+
+  scale_color_brewer(palette="Paired")+
+  labs(title="Relative Humidity in Northern Europe")
+
+
+
+
+
+
+####
+
+df_east<- filter(df,df$region=="Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_brewer(palette="Set1")+
+  labs(title="Temperature in Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+labs(title="Apparent vs Actual Temperature in Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+  geom_histogram(bins=20)+
+  scale_fill_brewer(palette="Set1")+
+  labs(title="Shortwave_radiation_sum in Eastern Europe")
+
+ggplot(data=df_east, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  facet_wrap(~capital_cities)+
+  scale_color_brewer(palette="Set1")+
+  labs(title="Relative Humidity in Eastern Europe")
+
+
+
+
+
+
+
+###
+
+df_west<- filter(df,df$region=="Western Europe")
+
+ggplot(data=df_west, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
+  geom_line(lwd=1)+
+  scale_color_hp(discrete=TRUE,option ="Ravenclaw")+
+  labs(title="Temperature in Western Europe")
+
+ggplot(data=df_west, mapping=aes(x=temperature_2m,y=apparent_temperature))+
+  geom_point()+
+  facet_wrap(~capital_cities)+
+  labs(title="Apparent vs Actual Temperature in Western Europe")
+
+ggplot(data=df_west, mapping=aes(x= shortwave_radiation_sum, fill=capital_cities))+
+    geom_histogram(bins=20)+
+    scale_fill_hp(discrete=TRUE,option ="Ravenclaw")+
+    labs(title="Shortwave_radiation_sum in Western Europe")
+
+ggplot(data=df_west, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cities))+
+  geom_line()+
+  scale_color_hp(discrete=TRUE,option ="Ravenclaw")+
+  facet_wrap(~capital_cities)+
+  labs(title="Relative Humidity in Western Europe")
+
+####
+
