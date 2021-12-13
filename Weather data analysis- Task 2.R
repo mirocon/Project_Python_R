@@ -137,7 +137,9 @@ ggplot(data=df_south, mapping=aes(x=time,y=relativehumidity_2m, color=capital_ci
   scale_color_manual(values=s_colors)+
   labs(title="Relative Humidity in Southern Europe")
 
+
 ### Caucasian Region
+
 
 df_caucasian<- filter(df,df$region=="Caucasian Region")
 
@@ -163,7 +165,9 @@ ggplot(data=df_caucasian, mapping=aes(x=time,y=relativehumidity_2m, color=capita
   labs(title="Relative Humidity in the Caucasian Region")
 
 
-##
+## Northern Europe
+
+
 df_north<- filter(df,df$region=="Northern Europe")
 
 ggplot(data=df_north, mapping=aes(x=time,y=temperature_2m, color=capital_cities))+
@@ -191,10 +195,7 @@ ggplot(data=df_north, mapping=aes(x=time,y=relativehumidity_2m, color=capital_ci
 
 
 
-
-
-
-####
+#### Eastern Europe
 
 df_east<- filter(df,df$region=="Eastern Europe")
 
@@ -221,11 +222,7 @@ ggplot(data=df_east, mapping=aes(x=time,y=relativehumidity_2m, color=capital_cit
 
 
 
-
-
-
-
-###
+### Western Europe
 
 df_west<- filter(df,df$region=="Western Europe")
 
